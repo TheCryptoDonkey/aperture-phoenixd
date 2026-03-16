@@ -1,0 +1,39 @@
+services:
+  phoenixd:
+    image: ghcr.io/acinq/phoenixd:latest
+    restart: always
+    ports:
+      - "127.0.0.1:9740:9740"
+    volumes:
+      - phoenixd-data:/root/.phoenix
+    command: ["--agree-to-terms-of-service", "--http-bind-ip", "0.0.0.0"]
+
+  echo-server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    command: ["echo-server"]
+    restart: always
+    expose:
+      - "8080"
+
+  aperture:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    command: ["aperture", "--configfile=/etc/aperture/aperture.yaml"]
+    restart: always
+    ports:
+      - "0.0.0.0:8081:8081"
+    volumes:
+      - ./aperture.yaml:/etc/aperture/aperture.yaml:ro
+      - aperture-data:/root/.aperture
+    environment:
+      - PHOENIXD_PASSWORD=${PHOENIXD_PASSWORD}
+    depends_on:
+      - phoenixd
+      - echo-server
+
+volumes:
+  phoenixd-data:
+  aperture-data:

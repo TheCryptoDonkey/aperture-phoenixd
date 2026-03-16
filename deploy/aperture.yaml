@@ -1,0 +1,28 @@
+# Aperture config for the Phoenixd demo.
+# This proxies the echo-server behind L402 authentication.
+
+listenaddr: "0.0.0.0:8081"
+
+# Generate self-signed TLS certs automatically.
+autocert: false
+
+authenticator:
+  phoenixdurl: "http://phoenixd:9740"
+  phoenixdpassword: "${PHOENIXD_PASSWORD}"
+  network: "mainnet"
+  disable: false
+
+# Default: macaroon + preimage verification only (no invoice status tracking).
+strictverify: false
+
+# SQLite database for macaroon/token storage.
+dbbackend: "sqlite"
+
+services:
+  - name: "echo"
+    hostregexp: ".*"
+    pathregexp: "^/v1/echo$"
+    address: "echo-server:8080"
+    protocol: "http"
+    price: 1
+    auth: "freebie 3"
