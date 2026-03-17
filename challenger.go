@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"time"
 )
 
 // PhoenixdChallenger implements Aperture's mint.Challenger and
@@ -25,7 +26,14 @@ func NewChallenger(phoenixdURL, password string) *PhoenixdChallenger {
 func (p *PhoenixdChallenger) NewChallenge(price int64) (string, [32]byte, error) {
 	var hash [32]byte
 
-	inv, err := p.client.CreateInvoice(context.Background(), price, "L402")
+	if price <= 0 {
+		return "", hash, fmt.Errorf("phoenixd: price must be positive, got %d", price)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	inv, err := p.client.CreateInvoice(ctx, price, "L402")
 	if err != nil {
 		return "", hash, err
 	}

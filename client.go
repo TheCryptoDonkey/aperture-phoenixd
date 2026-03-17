@@ -4,11 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
+
+// maxResponseBytes limits how much data we read from Phoenixd responses.
+// Expected responses are small JSON objects (< 1 KiB).
+const maxResponseBytes = 1 << 20 // 1 MiB
 
 // Client communicates with a Phoenixd instance via its REST API.
 type Client struct {
@@ -35,7 +41,7 @@ func NewClient(baseURL, password string) *Client {
 	return &Client{
 		baseURL:  strings.TrimRight(baseURL, "/"),
 		password: password,
-		http:     &http.Client{},
+		http:     &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
@@ -65,7 +71,7 @@ func (c *Client) CreateInvoice(ctx context.Context, amountSats int64, descriptio
 	}
 
 	var inv Invoice
-	if err := json.NewDecoder(resp.Body).Decode(&inv); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, maxResponseBytes)).Decode(&inv); err != nil {
 		return nil, fmt.Errorf("phoenixd: invalid response: %w", err)
 	}
 
@@ -93,7 +99,7 @@ func (c *Client) GetPayment(ctx context.Context, paymentHash string) (*Payment, 
 	}
 
 	var pmt Payment
-	if err := json.NewDecoder(resp.Body).Decode(&pmt); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, maxResponseBytes)).Decode(&pmt); err != nil {
 		return nil, fmt.Errorf("phoenixd: invalid response: %w", err)
 	}
 

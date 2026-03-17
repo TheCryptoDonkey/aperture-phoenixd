@@ -99,6 +99,18 @@ func TestNewChallenge_WrongHashLength(t *testing.T) {
 	require.ErrorContains(t, err, "wrong length")
 }
 
+func TestNewChallenge_ZeroPrice(t *testing.T) {
+	challenger := NewChallenger("http://localhost:9740", "pw")
+	_, _, err := challenger.NewChallenge(0)
+	require.ErrorContains(t, err, "price must be positive")
+}
+
+func TestNewChallenge_NegativePrice(t *testing.T) {
+	challenger := NewChallenger("http://localhost:9740", "pw")
+	_, _, err := challenger.NewChallenge(-1)
+	require.ErrorContains(t, err, "price must be positive")
+}
+
 func TestVerifyInvoiceStatus_NoOp(t *testing.T) {
 	challenger := NewChallenger("http://localhost:9740", "pw")
 	err := challenger.VerifyInvoiceStatus([32]byte{}, 100, "test")

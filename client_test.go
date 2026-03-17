@@ -62,3 +62,36 @@ func TestCreateInvoice_MalformedJSON(t *testing.T) {
 	_, err := client.CreateInvoice(t.Context(), 100, "L402")
 	require.ErrorContains(t, err, "phoenixd: invalid response:")
 }
+
+func TestGetPayment_Success(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, http.MethodGet, r.Method)
+		require.Equal(t, "/payments/incoming/abc123", r.URL.Path)
+
+		user, pass, ok := r.BasicAuth()
+		require.True(t, ok)
+		require.Equal(t, "", user)
+		require.Equal(t, "test-password", pass)
+
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"isPaid":true,"amountSat":100}`))
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, "test-password")
+	pmt, err := client.GetPayment(t.Context(), "abc123")
+	require.NoError(t, err)
+	require.True(t, pmt.IsPaid)
+	require.Equal(t, int64(100), pmt.AmountSat)
+}
+
+func TestGetPayment_Non200(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, "test-password")
+	_, err := client.GetPayment(t.Context(), "abc123")
+	require.ErrorContains(t, err, "HTTP 404")
+}
