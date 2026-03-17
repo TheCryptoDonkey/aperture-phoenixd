@@ -31,7 +31,9 @@ RUN cd /echo-server && go mod init echo-server && go build -o /echo-server/echo-
 # --- Runtime ---
 FROM alpine:3.21
 RUN apk add --no-cache ca-certificates envsubst
-RUN adduser -D -u 1000 aperture
+RUN adduser -D -u 1000 aperture \
+    && mkdir -p /etc/aperture /home/aperture/.aperture \
+    && chown -R 1000:1000 /etc/aperture /home/aperture
 
 COPY --from=build /aperture /usr/local/bin/aperture
 COPY --from=build /echo-server/echo-server /usr/local/bin/echo-server

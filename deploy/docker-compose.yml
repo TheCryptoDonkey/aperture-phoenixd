@@ -21,7 +21,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    entrypoint: ["/bin/sh", "-c", "envsubst < /etc/aperture/aperture.yaml.tmpl > /etc/aperture/aperture.yaml && exec aperture --configfile=/etc/aperture/aperture.yaml"]
+    entrypoint: ["/bin/sh", "-c", "envsubst < /etc/aperture/aperture.yaml.tmpl > /tmp/aperture.yaml && exec aperture --configfile=/tmp/aperture.yaml"]
     restart: always
     ports:
       - "0.0.0.0:8081:8081"
