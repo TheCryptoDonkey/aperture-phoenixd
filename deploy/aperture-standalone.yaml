@@ -7,7 +7,7 @@ listenaddr: "0.0.0.0:8081"
 autocert: false
 
 authenticator:
-  phoenixdurl: "http://host.docker.internal:9740"
+  phoenixdurl: "http://127.0.0.1:9740"
   phoenixdpassword: "${PHOENIXD_PASSWORD}"
   network: "mainnet"
   disable: false
@@ -20,7 +20,7 @@ services:
   - name: "echo"
     hostregexp: ".*"
     pathregexp: "^/.*$"
-    address: "echo-server:8080"
+    address: "127.0.0.1:8080"
     protocol: "http"
     price: 1
     auth: "freebie 3"
