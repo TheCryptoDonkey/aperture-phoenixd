@@ -1,0 +1,34 @@
+# Standalone deployment: Aperture + echo-server only.
+# Connects to an existing Phoenixd instance on the host network.
+# Used on the Hetzner VPS where Phoenixd is already running via the routing stack.
+
+services:
+  echo-server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    command: ["echo-server"]
+    restart: always
+    expose:
+      - "8080"
+
+  aperture:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    entrypoint: ["/bin/sh", "-c", "envsubst < /etc/aperture/aperture.yaml.tmpl > /tmp/aperture.yaml && exec aperture --configfile=/tmp/aperture.yaml"]
+    restart: always
+    ports:
+      - "127.0.0.1:8081:8081"
+    volumes:
+      - ./aperture-standalone.yaml:/etc/aperture/aperture.yaml.tmpl:ro
+      - aperture-data:/home/aperture/.aperture
+    environment:
+      - PHOENIXD_PASSWORD=${PHOENIXD_PASSWORD}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - echo-server
+
+volumes:
+  aperture-data:

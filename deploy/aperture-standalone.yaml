@@ -1,0 +1,26 @@
+# Aperture config for standalone deployment.
+# Connects to an existing Phoenixd on the host via host.docker.internal.
+# Proxies echo-server behind L402 authentication.
+
+listenaddr: "0.0.0.0:8081"
+
+autocert: false
+
+authenticator:
+  phoenixdurl: "http://host.docker.internal:9740"
+  phoenixdpassword: "${PHOENIXD_PASSWORD}"
+  network: "mainnet"
+  disable: false
+
+strictverify: false
+
+dbbackend: "sqlite"
+
+services:
+  - name: "echo"
+    hostregexp: ".*"
+    pathregexp: "^/.*$"
+    address: "echo-server:8080"
+    protocol: "http"
+    price: 1
+    auth: "freebie 3"
