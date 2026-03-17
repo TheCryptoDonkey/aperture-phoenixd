@@ -63,10 +63,12 @@ func TestCreateInvoice_MalformedJSON(t *testing.T) {
 	require.ErrorContains(t, err, "phoenixd: invalid response:")
 }
 
+const validHash = "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+
 func TestGetPayment_Success(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		require.Equal(t, http.MethodGet, r.Method)
-		require.Equal(t, "/payments/incoming/abc123", r.URL.Path)
+		require.Equal(t, "/payments/incoming/"+validHash, r.URL.Path)
 
 		user, pass, ok := r.BasicAuth()
 		require.True(t, ok)
@@ -79,7 +81,7 @@ func TestGetPayment_Success(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, "test-password")
-	pmt, err := client.GetPayment(t.Context(), "abc123")
+	pmt, err := client.GetPayment(t.Context(), validHash)
 	require.NoError(t, err)
 	require.True(t, pmt.IsPaid)
 	require.Equal(t, int64(100), pmt.AmountSat)
@@ -92,6 +94,16 @@ func TestGetPayment_Non200(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, "test-password")
-	_, err := client.GetPayment(t.Context(), "abc123")
+	_, err := client.GetPayment(t.Context(), validHash)
 	require.ErrorContains(t, err, "HTTP 404")
+}
+
+func TestGetPayment_InvalidHash(t *testing.T) {
+	client := NewClient("http://localhost:9740", "test-password")
+
+	_, err := client.GetPayment(t.Context(), "too-short")
+	require.ErrorContains(t, err, "invalid payment hash")
+
+	_, err = client.GetPayment(t.Context(), "../../admin/shutdown")
+	require.ErrorContains(t, err, "invalid payment hash")
 }

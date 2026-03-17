@@ -2,6 +2,7 @@ package phoenixd
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -81,6 +82,10 @@ func (c *Client) CreateInvoice(ctx context.Context, amountSats int64, descriptio
 // GetPayment retrieves an incoming payment by hash. Reserved for
 // future strictVerify=true support.
 func (c *Client) GetPayment(ctx context.Context, paymentHash string) (*Payment, error) {
+	if _, err := hex.DecodeString(paymentHash); err != nil || len(paymentHash) != 64 {
+		return nil, fmt.Errorf("phoenixd: invalid payment hash: must be 64 hex chars")
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet,
 		c.baseURL+"/payments/incoming/"+paymentHash, nil)
 	if err != nil {
