@@ -7,7 +7,7 @@ WORKDIR /src
 RUN git clone --depth 1 --branch v0.3.6-beta https://github.com/lightninglabs/aperture.git .
 
 # Copy in the Phoenixd challenger.
-COPY challenger-phoenixd.go /src/challenger/phoenixd.go
+COPY deploy/challenger-phoenixd.go /src/challenger/phoenixd.go
 
 # Patch config.go: add PhoenixdURL and PhoenixdPassword to AuthConfig.
 RUN sed -i '/DevServer bool.*devserver/a\\n\t\/\/ PhoenixdURL is the URL of a Phoenixd instance (e.g. http:\/\/localhost:9740).\n\t\/\/ When set, Phoenixd is used for invoice creation instead of LND.\n\tPhoenixdURL string `long:"phoenixdurl" description:"URL of a Phoenixd instance"`\n\n\tPhoenixdPassword string `long:"phoenixdpassword" description:"Phoenixd HTTP API password"`' config.go \
