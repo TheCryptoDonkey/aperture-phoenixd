@@ -30,7 +30,7 @@ func main() {
 			fmt.Fprintln(w, "hello")
 			return
 		}
-		w.Write(body)
+		_, _ = w.Write(body)
 	}
 
 	http.HandleFunc("/v1/echo", handler)
