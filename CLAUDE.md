@@ -1,6 +1,6 @@
 # CLAUDE.md — aperture-phoenixd
 
-Standalone Go module: Phoenixd challenger for Aperture L402 auth.
+Standalone Go module: Phoenixd challenger for Aperture L402 auth. Implements Aperture's `mint.Challenger` and `auth.InvoiceChecker` interfaces using a Phoenixd Lightning node instead of LND.
 
 ## Commands
 
@@ -16,8 +16,24 @@ go vet ./...           # Lint
 ```
 client.go              # Phoenixd HTTP client (createinvoice, getpayment)
 challenger.go          # PhoenixdChallenger (NewChallenge, VerifyInvoiceStatus)
+doc.go                 # Package documentation
 cmd/echo-server/       # Minimal demo API for Aperture to proxy
 ```
+
+## Architecture
+
+`Client` wraps the Phoenixd HTTP API (two endpoints: `POST /createinvoice` and `GET /payments/incoming/{hash}`). `PhoenixdChallenger` uses this client to create invoices and verify payment status. Only `strictVerify=false` is supported (the Aperture default). All HTTP requests use a 10-second timeout context.
+
+## Integration
+
+Import as a Go module:
+```go
+import phoenixd "github.com/forgesworn/aperture-phoenixd"
+
+challenger := phoenixd.NewChallenger("http://localhost:9740", "phoenixd-password")
+```
+
+Wire `challenger` into Aperture's configuration as a custom `Challenger` implementation.
 
 ## Conventions
 
