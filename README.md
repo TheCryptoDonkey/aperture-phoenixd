@@ -4,6 +4,7 @@
 
 [![MIT licence](https://img.shields.io/badge/licence-MIT-blue.svg)](./LICENSE)
 [![Go](https://img.shields.io/badge/Go-1.24+-00ADD8)](https://golang.org/)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/TheCryptoDonkey?logo=githubsponsors&color=ea4aaa&label=Sponsor)](https://github.com/sponsors/TheCryptoDonkey)
 
 Use [Phoenixd](https://phoenix.acinq.co/server) as the Lightning backend for [Aperture](https://github.com/lightninglabs/aperture) — no LND required.
 
